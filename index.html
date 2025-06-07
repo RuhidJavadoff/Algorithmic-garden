@@ -11,24 +11,24 @@
 
         body {
             margin: 0;
-            overflow: hidden; /* Səhifədə scrollbar olmasın */
+            overflow: hidden; /* Sehifede scrollbar olmasın isteye uygun deyisin */
             font-family: "Tahoma", "Geneva", sans-serif;
             color: white;
-            user-select: none; /* Mətn seçilə bilməsin */
+            user-select: none; /* Metn secile bilmesin */
             display: flex;
             flex-direction: column;
-            height: 100vh; /* Tam ekran hündürlüyü */
-            background-color: #000; /* Fonu qara edirik */
+            height: 100vh; /* Tam ekran hundurluyu */
+            background-color: #000; 
         }
 
-        /* P5.js canvas-ının yerləşəcəyi konteyner */
+
         #generative-background {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1; /* UI elementlərinin altında olsun */
+            z-index: 1; 
         }
 
         /* P5.js tərəfindən yaradılan canvas */
@@ -36,33 +36,33 @@
             display: block; /* Əlavə boşluqları aradan qaldırır */
         }
 
-        /* UI Overlay Stilleri */
+        /* UI Overlay */
         #ui-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 10; /* Generativ fonun üstündə olsun */
+            z-index: 10; 
             display: flex;
-            flex-wrap: wrap; /* Mobil üçün elementlərin sətirlərə düşməsi */
-            justify-content: center; /* Mərkəzləşdirmə */
-            align-items: center; /* Şaquli mərkəzləşdirmə */
+            flex-wrap: wrap; 
+            justify-content: center; 
+            align-items: center; 
             padding: 20px;
             box-sizing: border-box;
-            pointer-events: none; /* Default olaraq pointer eventlərini keçirir */
+            pointer-events: none; 
         }
 
         .module-link {
-            background-color: rgba(0, 0, 0, 0.6); /* Yarı-şəffaf fon */
-            border: 1px solid rgba(0, 255, 255, 0.3); /* Yüngül neon çərçivə */
+            background-color: rgba(0, 0, 0, 0.6); /* yari seffaf fon */
+            border: 1px solid rgba(0, 255, 255, 0.3); /* neon border */
             padding: 15px 25px;
             margin: 15px;
             border-radius: 10px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease-in-out;
-            pointer-events: auto; /* Kliklərə reaksiya versin */
+            pointer-events: auto; /* reaksiya kliklere */
             box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
             display: flex;
             justify-content: center;
@@ -83,7 +83,7 @@
         .module-name {
             font-size: 1.2em;
             font-weight: bold;
-            text-shadow: 0 0 8px rgba(0, 255, 255, 0.7); /* Neon mətn kölgəsi */
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.7); /* Neon txt kolgesi */
         }
 
         /* --- Bildiriş Pəncərəsi Stilleri --- */
@@ -158,7 +158,7 @@
             filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.1));
         }
 
-        /* --- Mobil Responsive Stilleri --- */
+        /* --- Mobil Responsive stylesi --- */
         @media (max-width: 768px) {
             .module-link {
                 padding: 10px 15px;
@@ -179,14 +179,14 @@
 
         @media (max-width: 480px) {
             #ui-overlay {
-                flex-direction: column; /* Mobil telefonda linklər bir-birinin altında olsun */
+                flex-direction: column; 
                 justify-content: flex-start;
                 align-items: center;
                 padding: 10px;
             }
             .module-link {
-                width: calc(100% - 20px); /* Kənarlardan boşluq buraxır */
-                max-width: 250px; /* Çox böyüməsin */
+                width: calc(100% - 20px); 
+                max-width: 250px; 
                 margin: 8px 0;
                 padding: 12px 15px;
             }
@@ -280,7 +280,7 @@
                     p5sketch.setModuleActive(false);
                 }
             });
-            // Mobil toxunuşlar üçün
+         
             link.addEventListener('touchstart', () => {
                 if (typeof p5sketch !== 'undefined' && p5sketch.setModuleActive) {
                     p5sketch.setModuleActive(true, link.dataset.id);
@@ -293,7 +293,7 @@
             }, { passive: true });
         });
 
-        // --- Bildiriş Funksiyaları ---
+       
         function showNotification(message = "Sistem yükləndi və hazır vəziyyətdədir!", title = "Bildiriş") {
             if (!notificationArea) return;
             notificationText.textContent = message;
@@ -309,39 +309,39 @@
             if (notificationArea) notificationArea.classList.remove('visible');
         }
 
-        // Bildiriş bağlama düyməsi
+      
         if(closeNotificationButton) {
             closeNotificationButton.addEventListener('click', hideNotification);
         }
 
-        // --- P5.js Generativ Qrafika Eskizi ---
-        let p5sketch; // P5.js eskizini saxlayacaq dəyişən
+     
+        let p5sketch; 
 
         const s = (sketch) => {
             let particles = [];
-            let activeModule = null; // Aktiv modulun ID-si
+            let activeModule = null; 
 
             sketch.setup = () => {
                 const canvas = sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
-                canvas.parent('generative-background'); // Canvası bu divin içinə yerləşdir
+                canvas.parent('generative-background'); 
                 sketch.background(0);
                 sketch.noStroke();
 
-                // Başlanğıc hissəcikləri yarat
+            
                 for (let i = 0; i < 200; i++) {
                     particles.push(new Particle(sketch));
                 }
             };
 
             sketch.draw = () => {
-                sketch.background(0, 0, 0, 50); // Yüngül şəffaf fon, yüngül iz effekti yaradır
+                sketch.background(0, 0, 0, 50); 
 
                 for (let i = particles.length - 1; i >= 0; i--) {
                     let p = particles[i];
                     p.update();
                     p.display();
 
-                    // Kursor yaxınlığında hissəcikləri cəzb et (və ya mobil toxunuş)
+                 
                     let mouseX = sketch.mouseX;
                     let mouseY = sketch.mouseY;
                     if (sketch.touches && sketch.touches.length > 0) {
@@ -350,7 +350,7 @@
                     }
 
                     let d = sketch.dist(p.x, p.y, mouseX, mouseY);
-                    if (d < 150) { // Kursor/toxunuşa yaxın olduqda
+                    if (d < 150) {
                         let force = sketch.map(d, 0, 150, 0.05, 0);
                         p.vx += (mouseX - p.x) * force * 0.001;
                         p.vy += (mouseY - p.y) * force * 0.001;
@@ -372,11 +372,11 @@
                     
                     if (p.isDead()) {
                         particles.splice(i, 1);
-                        particles.push(new Particle(sketch)); // Ölənləri yeniləri ilə əvəz et
+                        particles.push(new Particle(sketch));
                     }
                 }
                 
-                // Hər saniyədə yeni hissəciklər əlavə edin
+      
                 if (sketch.frameCount % 60 === 0) {
                     particles.push(new Particle(sketch));
                 }
@@ -386,11 +386,11 @@
                 sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
             };
 
-            // main.js-dən çağırılacaq funksiya
+         
             sketch.setModuleActive = (isActive, moduleId = null) => {
                 if (isActive) {
                     activeModule = moduleId;
-                    // Aktivləşəndə hissəcikləri modulun ətrafına cəzb et
+                 
                     if (activeModule) {
                         let moduleElement = document.querySelector(`.module-link[data-id="${activeModule}"]`);
                         if (moduleElement) {
@@ -399,7 +399,7 @@
                             let moduleCenterY = rect.top + rect.height / 2;
                             particles.forEach(p => {
                                 let d = sketch.dist(p.x, p.y, moduleCenterX, moduleCenterY);
-                                if (d < 300) { // Müəyyən radiusdakı hissəcikləri cəzb et
+                                if (d < 300) { 
                                     p.vx += (moduleCenterX - p.x) * 0.005;
                                     p.vy += (moduleCenterY - p.y) * 0.005;
                                 }
@@ -412,7 +412,7 @@
             };
         };
 
-        // Hissəcik obyekti
+        // hisse obyekti
         class Particle {
             constructor(sketch) {
                 this.sketch = sketch;
@@ -426,15 +426,16 @@
                 this.vy = this.sketch.random(-0.5, 0.5);
                 this.alpha = this.sketch.random(50, 150);
                 this.radius = this.sketch.random(1, 3);
-                this.color = this.sketch.color(200, 200, 255, this.alpha); // Default rəng
+                this.color = this.sketch.color(200, 200, 255, this.alpha); // Default reng
             }
 
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
-                this.alpha -= 0.5; // Tədricən yox olsun
+                this.alpha -= 0.5;
                 
-                // Hissəcik ekran sərhədlərindən çıxarsa yenidən yaradın
+            
+                
                 if (this.x < 0 || this.x > this.sketch.width || this.y < 0 || this.y > this.sketch.height) {
                     this.reset();
                 }
@@ -454,8 +455,7 @@
             }
         }
 
-        // P5.js eskizini başladırıq
-        // p5sketch dəyişənini global olaraq təyin edirik ki, onu modul linkləri üçün də istifadə edə bilək.
+  
         document.addEventListener('DOMContentLoaded', () => {
             p5sketch = new p5(s);
             showNotification('Alqoritmik Bağça yükləndi. Araşdırmağa başlayın!', 'Xoş Gəlmisiniz');
