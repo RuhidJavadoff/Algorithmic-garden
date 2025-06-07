@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ruhid Javadoff - Alqoritmik Bağça</title>
+    <link rel="icon" type="image/png" href="https://ruhidjavadoff.site/sekiller/logorjxp.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+    <style>
+        /* style.css faylı */
+
+        body {
+            margin: 0;
+            overflow: hidden; /* Səhifədə scrollbar olmasın */
+            font-family: "Tahoma", "Geneva", sans-serif;
+            color: white;
+            user-select: none; /* Mətn seçilə bilməsin */
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* Tam ekran hündürlüyü */
+            background-color: #000; /* Fonu qara edirik */
+        }
+
+        /* P5.js canvas-ının yerləşəcəyi konteyner */
+        #generative-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* UI elementlərinin altında olsun */
+        }
+
+        /* P5.js tərəfindən yaradılan canvas */
+        #generative-background canvas {
+            display: block; /* Əlavə boşluqları aradan qaldırır */
+        }
+
+        /* UI Overlay Stilleri */
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10; /* Generativ fonun üstündə olsun */
+            display: flex;
+            flex-wrap: wrap; /* Mobil üçün elementlərin sətirlərə düşməsi */
+            justify-content: center; /* Mərkəzləşdirmə */
+            align-items: center; /* Şaquli mərkəzləşdirmə */
+            padding: 20px;
+            box-sizing: border-box;
+            pointer-events: none; /* Default olaraq pointer eventlərini keçirir */
+        }
+
+        .module-link {
+            background-color: rgba(0, 0, 0, 0.6); /* Yarı-şəffaf fon */
+            border: 1px solid rgba(0, 255, 255, 0.3); /* Yüngül neon çərçivə */
+            padding: 15px 25px;
+            margin: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            pointer-events: auto; /* Kliklərə reaksiya versin */
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-width: 150px;
+            opacity: 0.8;
+        }
+
+        .module-link:hover {
+            background-color: rgba(0, 255, 255, 0.1); /* Hover zamanı daha parlaq fon */
+            border-color: rgba(0, 255, 255, 0.8);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), 0 0 30px rgba(0, 255, 255, 0.4);
+            transform: translateY(-5px) scale(1.05); /* Yüngül hərəkət və böyütmə */
+            opacity: 1;
+        }
+
+        .module-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.7); /* Neon mətn kölgəsi */
+        }
+
+        /* --- Bildiriş Pəncərəsi Stilleri --- */
+        .notification {
+            position: fixed;
+            bottom: 35px;
+            right: 5px;
+            width: 220px;
+            background-color: #FFFFE1;
+            border: 1px solid #000000;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            z-index: 2100;
+            padding: 0;
+            font-size: 11px;
+            color: black;
+            display: none; /* Başlanğıcda gizli */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: translateY(20px);
+            pointer-events: auto; /* Bildirişlər aktiv olsun */
+        }
+
+        .notification.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .notification-title-bar {
+            background-color: #FCD44F;
+            padding: 3px 5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #000;
+        }
+
+        .notification-title-bar .close-notification {
+            background-color: #FF7670;
+            border: 1px solid #7F7F7F;
+            color: white;
+            font-family: "Marlett", "Webdings";
+            width: 15px;
+            height: 15px;
+            line-height: 13px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .notification-content {
+            padding: 8px 10px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .notification-content img {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+
+        .notification-balloon-tail {
+            position: absolute;
+            bottom: -10px;
+            right: 20px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #FFFFE1;
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.1));
+        }
+
+        /* --- Mobil Responsive Stilleri --- */
+        @media (max-width: 768px) {
+            .module-link {
+                padding: 10px 15px;
+                margin: 10px;
+                min-width: 120px;
+            }
+            .module-name {
+                font-size: 1em;
+            }
+            .notification {
+                width: 180px;
+                font-size: 10px;
+            }
+            .notification-balloon-tail {
+                right: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #ui-overlay {
+                flex-direction: column; /* Mobil telefonda linklər bir-birinin altında olsun */
+                justify-content: flex-start;
+                align-items: center;
+                padding: 10px;
+            }
+            .module-link {
+                width: calc(100% - 20px); /* Kənarlardan boşluq buraxır */
+                max-width: 250px; /* Çox böyüməsin */
+                margin: 8px 0;
+                padding: 12px 15px;
+            }
+            .module-name {
+                font-size: 0.9em;
+            }
+            .notification {
+                width: calc(100% - 20px);
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+            }
+            .notification-balloon-tail {
+                right: 50%;
+                transform: translateX(50%) translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="generative-background"></div>
+    <div id="ui-overlay">
+        <div class="module-link" data-id="private" data-link="https://ruhidjavadoff.site/Private/">
+            <span class="module-name">Şəxsi</span>
+        </div>
+        <div class="module-link" data-id="retro" data-link="https://ruhidjavadoff.site/Oyunlar/">
+            <span class="module-name">Retro Oyunlar</span>
+        </div>
+        <div class="module-link" data-id="form" data-link="https://ruhidjavadoff.site/Form/">
+            <span class="module-name">Form</span>
+        </div>
+        <div class="module-link" data-id="cv" data-link="https://ruhidjavadoff.site/CV/">
+            <span class="module-name">Portfolyo & CV</span>
+        </div>
+        <div class="module-link" data-id="ai" data-link="https://ruhidjavadoff.site/ai/">
+            <span class="module-name">Süni İntellekt</span>
+        </div>
+        <div class="module-link" data-id="store" data-link="https://ruhidjavadoff.site/link">
+            <span class="module-name">Javadovs Store</span>
+        </div>
+        <div class="module-link" data-id="myapps" data-link="https://ruhidjavadoff.site/app/">
+            <span class="module-name">My Apps</span>
+        </div>
+        <div class="module-link" data-id="about" data-link="https://ruhidjavadoff.site/rj">
+            <span class="module-name">Haqqımızda</span>
+        </div>
+    </div>
+    <div id="notification-area" class="notification">
+        <div class="notification-title-bar">
+            <span id="notification-title">Bildiriş</span>
+            <button class="close-notification" id="close-notification-button">×</button>
+        </div>
+        <div class="notification-content">
+            <img src="https://ruhidjavadoff.site/xp/xpbildiris.png" alt="Notification Icon" id="notification-icon-img">
+            <span id="notification-text">Alqoritmik Bağça yükləndi. Araşdırmağa başlayın!</span>
+        </div>
+        <div class="notification-balloon-tail"></div>
+    </div>
+
+    <script>
+        // main.js faylı
+
+        // Sayt Elementləri
+        const uiOverlay = document.getElementById('ui-overlay');
+        const notificationArea = document.getElementById('notification-area');
+        const closeNotificationButton = document.getElementById('close-notification-button');
+        const notificationText = document.getElementById('notification-text');
+
+        // Modul linkləri üçün event listenerlər
+        const moduleLinks = document.querySelectorAll('.module-link');
+
+        moduleLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault(); // Default davranışı önlə
+                const targetLink = link.dataset.link;
+                const moduleName = link.querySelector('.module-name').textContent;
+                if (targetLink) {
+                    window.open(targetLink, '_blank');
+                    showNotification(`"${moduleName}" alqoritmi işə düşür...`, 'Yüklənir');
+                }
+            });
+
+            // Kursor/toxunuş üzərinə gəldikdə və çıxdıqda P5.js eskizini dinamik olaraq dəyişdirmək üçün
+            link.addEventListener('mouseenter', () => {
+                if (typeof p5sketch !== 'undefined' && p5sketch.setModuleActive) {
+                    p5sketch.setModuleActive(true, link.dataset.id);
+                }
+            });
+            link.addEventListener('mouseleave', () => {
+                if (typeof p5sketch !== 'undefined' && p5sketch.setModuleActive) {
+                    p5sketch.setModuleActive(false);
+                }
+            });
+            // Mobil toxunuşlar üçün
+            link.addEventListener('touchstart', () => {
+                if (typeof p5sketch !== 'undefined' && p5sketch.setModuleActive) {
+                    p5sketch.setModuleActive(true, link.dataset.id);
+                }
+            }, { passive: true });
+            link.addEventListener('touchend', () => {
+                if (typeof p5sketch !== 'undefined' && p5sketch.setModuleActive) {
+                    p5sketch.setModuleActive(false);
+                }
+            }, { passive: true });
+        });
+
+        // --- Bildiriş Funksiyaları ---
+        function showNotification(message = "Sistem yükləndi və hazır vəziyyətdədir!", title = "Bildiriş") {
+            if (!notificationArea) return;
+            notificationText.textContent = message;
+            const notificationTitleEl = notificationArea.querySelector('#notification-title');
+            if (notificationTitleEl) {
+                notificationTitleEl.textContent = title;
+            }
+            notificationArea.classList.add('visible');
+            setTimeout(() => { hideNotification(); }, 7000); // 7 saniyə sonra gizlət
+        }
+
+        function hideNotification() {
+            if (notificationArea) notificationArea.classList.remove('visible');
+        }
+
+        // Bildiriş bağlama düyməsi
+        if(closeNotificationButton) {
+            closeNotificationButton.addEventListener('click', hideNotification);
+        }
+
+        // --- P5.js Generativ Qrafika Eskizi ---
+        let p5sketch; // P5.js eskizini saxlayacaq dəyişən
+
+        const s = (sketch) => {
+            let particles = [];
+            let activeModule = null; // Aktiv modulun ID-si
+
+            sketch.setup = () => {
+                const canvas = sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
+                canvas.parent('generative-background'); // Canvası bu divin içinə yerləşdir
+                sketch.background(0);
+                sketch.noStroke();
+
+                // Başlanğıc hissəcikləri yarat
+                for (let i = 0; i < 200; i++) {
+                    particles.push(new Particle(sketch));
+                }
+            };
+
+            sketch.draw = () => {
+                sketch.background(0, 0, 0, 50); // Yüngül şəffaf fon, yüngül iz effekti yaradır
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    let p = particles[i];
+                    p.update();
+                    p.display();
+
+                    // Kursor yaxınlığında hissəcikləri cəzb et (və ya mobil toxunuş)
+                    let mouseX = sketch.mouseX;
+                    let mouseY = sketch.mouseY;
+                    if (sketch.touches && sketch.touches.length > 0) {
+                        mouseX = sketch.touches[0].x;
+                        mouseY = sketch.touches[0].y;
+                    }
+
+                    let d = sketch.dist(p.x, p.y, mouseX, mouseY);
+                    if (d < 150) { // Kursor/toxunuşa yaxın olduqda
+                        let force = sketch.map(d, 0, 150, 0.05, 0);
+                        p.vx += (mouseX - p.x) * force * 0.001;
+                        p.vy += (mouseY - p.y) * force * 0.001;
+                        
+                        // Aktiv modul varsa, həmin hissəcikləri daha parlaq et
+                        if (activeModule) {
+                            let moduleElement = document.querySelector(`.module-link[data-id="${activeModule}"]`);
+                            if (moduleElement) {
+                                let rect = moduleElement.getBoundingClientRect();
+                                let moduleCenterX = rect.left + rect.width / 2;
+                                let moduleCenterY = rect.top + rect.height / 2;
+                                let dToModule = sketch.dist(p.x, p.y, moduleCenterX, moduleCenterY);
+                                if (dToModule < 100) { // Modula yaxın hissəcikləri fərqli rəngdə et
+                                    p.setColor(sketch.color(0, 255, 255, p.alpha)); // Açıq mavi neon
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (p.isDead()) {
+                        particles.splice(i, 1);
+                        particles.push(new Particle(sketch)); // Ölənləri yeniləri ilə əvəz et
+                    }
+                }
+                
+                // Hər saniyədə yeni hissəciklər əlavə edin
+                if (sketch.frameCount % 60 === 0) {
+                    particles.push(new Particle(sketch));
+                }
+            };
+
+            sketch.windowResized = () => {
+                sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
+            };
+
+            // main.js-dən çağırılacaq funksiya
+            sketch.setModuleActive = (isActive, moduleId = null) => {
+                if (isActive) {
+                    activeModule = moduleId;
+                    // Aktivləşəndə hissəcikləri modulun ətrafına cəzb et
+                    if (activeModule) {
+                        let moduleElement = document.querySelector(`.module-link[data-id="${activeModule}"]`);
+                        if (moduleElement) {
+                            let rect = moduleElement.getBoundingClientRect();
+                            let moduleCenterX = rect.left + rect.width / 2;
+                            let moduleCenterY = rect.top + rect.height / 2;
+                            particles.forEach(p => {
+                                let d = sketch.dist(p.x, p.y, moduleCenterX, moduleCenterY);
+                                if (d < 300) { // Müəyyən radiusdakı hissəcikləri cəzb et
+                                    p.vx += (moduleCenterX - p.x) * 0.005;
+                                    p.vy += (moduleCenterY - p.y) * 0.005;
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    activeModule = null;
+                }
+            };
+        };
+
+        // Hissəcik obyekti
+        class Particle {
+            constructor(sketch) {
+                this.sketch = sketch;
+                this.reset();
+            }
+
+            reset() {
+                this.x = this.sketch.random(this.sketch.width);
+                this.y = this.sketch.random(this.sketch.height);
+                this.vx = this.sketch.random(-0.5, 0.5);
+                this.vy = this.sketch.random(-0.5, 0.5);
+                this.alpha = this.sketch.random(50, 150);
+                this.radius = this.sketch.random(1, 3);
+                this.color = this.sketch.color(200, 200, 255, this.alpha); // Default rəng
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= 0.5; // Tədricən yox olsun
+                
+                // Hissəcik ekran sərhədlərindən çıxarsa yenidən yaradın
+                if (this.x < 0 || this.x > this.sketch.width || this.y < 0 || this.y > this.sketch.height) {
+                    this.reset();
+                }
+            }
+
+            display() {
+                this.sketch.fill(this.color);
+                this.sketch.ellipse(this.x, this.y, this.radius * 2);
+            }
+
+            isDead() {
+                return this.alpha <= 0;
+            }
+
+            setColor(c) {
+                this.color = c;
+            }
+        }
+
+        // P5.js eskizini başladırıq
+        // p5sketch dəyişənini global olaraq təyin edirik ki, onu modul linkləri üçün də istifadə edə bilək.
+        document.addEventListener('DOMContentLoaded', () => {
+            p5sketch = new p5(s);
+            showNotification('Alqoritmik Bağça yükləndi. Araşdırmağa başlayın!', 'Xoş Gəlmisiniz');
+        });
+    </script>
+</body>
+</html>
